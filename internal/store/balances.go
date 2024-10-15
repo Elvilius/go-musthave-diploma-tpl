@@ -122,11 +122,13 @@ func (s *Store) GetWithdraws(ctx context.Context, userID uint64) ([]models.GetWi
 	}
 
 	args := []interface{}{userID}
-	result, err := tx.QueryContext(ctx, "SELECT order_number, sum, processed_at from withdrawals WHERE user_id = $1 ORDER BY processed_at DESC ", args...)
+	result, err := tx.QueryContext(ctx, "SELECT order_number, sum, processed_at from withdrawals WHERE user_id = $1 ORDER BY processed_at DESC", args...)
 	if err != nil {
 		tx.Rollback()
 		return withdraws, err
 	}
+	defer result.Close()
+
 	for result.Next() {
 		var withdraw models.GetWithdraw
 		err := result.Scan(&withdraw.OrderNumber, &withdraw.Sum, &withdraw.ProcessedAt)
@@ -137,7 +139,12 @@ func (s *Store) GetWithdraws(ctx context.Context, userID uint64) ([]models.GetWi
 		withdraws = append(withdraws, withdraw)
 	}
 
-	if err := tx.Commit(); err != nil {
+	if err = result.Err(); err != nil {
+		tx.Rollback()
+		return withdraws, err
+	}
+
+	if err = tx.Commit(); err != nil {
 		return withdraws, err
 	}
 

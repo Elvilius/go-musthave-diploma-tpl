@@ -20,6 +20,10 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
+type contextKey string
+
+const UserIDKey = contextKey("user_id")
+
 func TestHandler_GetBalance(t *testing.T) {
 	cfg := config.New()
 
@@ -42,7 +46,7 @@ func TestHandler_GetBalance(t *testing.T) {
 	router.Post("/api/user/balance", h.GetBalance)
 
 	request := httptest.NewRequest(http.MethodPost, "/api/user/balance", nil)
-	request = request.WithContext(context.WithValue(request.Context(), "user_id", 1))
+	request = request.WithContext(context.WithValue(request.Context(), UserIDKey, 1))
 	request.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjJ9.6Oz5eGuwTSWswdvgsxbhvDIBkd9YKzxJSyd9mg4auBM")
 
 	w := httptest.NewRecorder()

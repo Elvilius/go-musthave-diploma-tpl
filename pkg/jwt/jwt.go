@@ -28,7 +28,7 @@ func (j *Jwt) GenerateTokenForUser(userID int) (string, error) {
 	return jwtString, err
 }
 
-func (j *Jwt) GetUserId(tokenString string) int {
+func (j *Jwt) GetUserID(tokenString string) int {
 	claims := &claims{}
 
 	jwtToken, err := token.ParseWithClaims(tokenString, claims, func(t *token.Token) (interface{}, error) {

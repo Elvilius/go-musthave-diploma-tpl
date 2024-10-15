@@ -9,6 +9,7 @@ import (
 
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/config"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/models"
+	"github.com/Elvilius/go-musthave-diploma-tpl.git/pkg/middleware"
 )
 
 type User interface {
@@ -49,8 +50,7 @@ func New(
 }
 
 func (h Handler) getUserID(req *http.Request) (uint64, error) {
-	fmt.Println(req, "123123123")
-	userIDStr := fmt.Sprintf("%v", req.Context().Value("user_id"))
+	userIDStr := fmt.Sprintf("%v", req.Context().Value(middleware.UserIDKey))
 
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {

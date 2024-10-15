@@ -10,8 +10,12 @@ import (
 	"time"
 )
 
+type contextKey string
+
+const UserIDKey = contextKey("user_id")
+
 type Tokener interface {
-	GetUserId(tokenString string) int
+	GetUserID(tokenString string) int
 }
 
 type (
@@ -58,13 +62,13 @@ func ValidateJWT(token Tokener) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authorization := r.Header.Get("Authorization")
 			bearer := strings.TrimPrefix(authorization, "Bearer ")
-			userID := token.GetUserId(bearer)
+			userID := token.GetUserID(bearer)
 			if userID < 1 {
 				http.Error(w, "", http.StatusUnauthorized)
 				return
 			}
 
-			r = r.WithContext(context.WithValue(r.Context(), "user_id", userID))
+			r = r.WithContext(context.WithValue(r.Context(), UserIDKey, userID))
 			h.ServeHTTP(w, r)
 		})
 	}
