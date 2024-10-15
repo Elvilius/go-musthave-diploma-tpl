@@ -1,6 +1,6 @@
 module github.com/Elvilius/go-musthave-diploma-tpl.git
 
-go 1.23.1
+go 1.22
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
