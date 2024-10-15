@@ -1,4 +1,4 @@
-package external_order_status_fetcher
+package externalorderstatusfetcher
 
 import (
 	"context"

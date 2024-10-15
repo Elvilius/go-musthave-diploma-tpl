@@ -7,7 +7,7 @@ import (
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/app/server"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/balances"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/config"
-	external_order_status_fetcher "github.com/Elvilius/go-musthave-diploma-tpl.git/internal/external-order-status-fetcher"
+	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/external-order-status-fetcher"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/handler"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/orders"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/store"
@@ -42,7 +42,7 @@ func New() *App {
 
 	tokenService := jwt.New(cfg)
 	userService := users.New(store, tokenService, cfg)
-	externalOrderStatusFetcher := external_order_status_fetcher.New(cfg, logger)
+	externalOrderStatusFetcher := externalorderstatusfetcher.New(cfg, logger)
 	orderService := orders.New(store, externalOrderStatusFetcher, cfg, logger)
 	balanceService := balances.New(store)
 
