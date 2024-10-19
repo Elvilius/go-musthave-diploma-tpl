@@ -6,6 +6,6 @@ func NewMockToken() *MockToken {
 	return &MockToken{}
 }
 
-func (t *MockToken) GenerateTokenForUser(userID int) (string, error) {
+func (t *MockToken) GenerateTokenForUser(_ int) (string, error) {
 	return "secret", nil
 }

@@ -26,7 +26,7 @@ func (h *Handler) RegisterUser(resp http.ResponseWriter, req *http.Request) {
 		validateErrors = append(validateErrors, "login must required")
 	}
 
-	if len(registerUser.Password) <= 0 {
+	if len(registerUser.Password) == 0 {
 		validateErrors = append(validateErrors, "password must required")
 	}
 

@@ -20,7 +20,7 @@ func CheckLuhn(cnn string) bool {
 		if i%2 == parity {
 			digital = digital * 2
 			if digital > 9 {
-				digital = digital - 9
+				digital-=9
 			}
 		}
 		sum = digital + sum

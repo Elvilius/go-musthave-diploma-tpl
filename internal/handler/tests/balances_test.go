@@ -35,7 +35,7 @@ func TestHandler_GetBalance(t *testing.T) {
 	balancesStore := mocks.NewMockBalancesStore(ctrl)
 	token := mocks.NewMockToken()
 	userService := users.New(userStore, token, cfg)
-	orderService := orders.New(orderStore, nil, nil, nil)
+	orderService := orders.New(context.TODO(), orderStore, nil, nil, nil)
 	balanceService := balances.New(balancesStore)
 
 	h := handler.New(userService, orderService, balanceService, cfg)

@@ -10,7 +10,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	app := app.New()
+	app := app.New(ctx)
 
-	app.RunContext(ctx)
+	app.RunContext()
 }

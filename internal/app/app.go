@@ -20,13 +20,14 @@ import (
 )
 
 type App struct {
+	ctx    context.Context
 	server *server.Server
 	db     *sql.DB
 	logger *zap.SugaredLogger
 	order  *orders.Service
 }
 
-func New() *App {
+func New(ctx context.Context) *App {
 	logger, err := logger.New()
 	if err != nil {
 		logger.Fatalw("Failed to open DB", "error", err)
@@ -43,29 +44,29 @@ func New() *App {
 	tokenService := jwt.New(cfg)
 	userService := users.New(store, tokenService, cfg)
 	externalOrderStatusFetcher := externalorderstatusfetcher.New(cfg, logger)
-	orderService := orders.New(store, externalOrderStatusFetcher, cfg, logger)
+	orderService := orders.New(ctx, store, externalOrderStatusFetcher, cfg, logger)
 	balanceService := balances.New(store)
 
 	handler := handler.New(userService, orderService, balanceService, cfg)
 
-	server := server.New(*cfg, logger, handler, tokenService)
+	server := server.New(*cfg, logger, handler, orderService, tokenService)
 
 	return &App{
 		server: server,
 		db:     db,
 		logger: logger,
 		order:  orderService,
+		ctx: ctx,
 	}
 }
 
-func (a *App) RunContext(ctx context.Context) {
+func (a *App) RunContext() {
 	a.logger.Infow("Running migrations", "db", a.db)
-	if err := goose.UpContext(ctx, a.db, "./internal/store/migrations"); err != nil {
+	if err := goose.UpContext(a.ctx, a.db, "./internal/store/migrations"); err != nil {
 		a.logger.Fatalw("Failed to run migrations", "error", err)
 	}
 
-	// go a.order.CheckStatus(ctx)
-	a.server.Run(ctx)
+	a.server.Run(a.ctx)
 
 	defer a.db.Close()
 }

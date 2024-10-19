@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -71,7 +72,7 @@ func TestHandler_RegisterUser(t *testing.T) {
 		token := mocks.NewMockToken()
 		userService := users.New(userStore, token, cfg)
 
-		orderService := orders.New(nil, nil, nil, nil)
+		orderService := orders.New(context.TODO(), nil, nil, nil, nil)
 		balanceService := balances.New(nil)
 
 		h := handler.New(userService, orderService, balanceService, cfg)
@@ -149,7 +150,7 @@ func TestHandler_Login(t *testing.T) {
 		token := mocks.NewMockToken()
 		userService := users.New(userStore, token, cfg)
 
-		orderService := orders.New(nil, nil, nil, nil)
+		orderService := orders.New(context.TODO(), nil, nil, nil, nil)
 		balanceService := balances.New(nil)
 
 		h := handler.New(userService, orderService, balanceService, cfg)

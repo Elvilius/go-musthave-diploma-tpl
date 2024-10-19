@@ -10,6 +10,7 @@ import (
 
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/config"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/handler"
+	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/orders"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/pkg/jwt"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/pkg/middleware"
 	"github.com/go-chi/chi/v5"
@@ -22,15 +23,17 @@ type Server struct {
 	router  *chi.Mux
 	logger  *zap.SugaredLogger
 	token   *jwt.Jwt
+	order   *orders.Service
 }
 
-func New(cfg config.Config, logger *zap.SugaredLogger, handler *handler.Handler, token *jwt.Jwt) *Server {
+func New(cfg config.Config, logger *zap.SugaredLogger, handler *handler.Handler, order *orders.Service, token *jwt.Jwt) *Server {
 	s := &Server{
 		cfg:     cfg,
 		handler: handler,
 		router:  chi.NewRouter(),
 		token:   token,
 		logger:  logger,
+		order:   order,
 	}
 
 	s.initRout()
@@ -82,5 +85,6 @@ func (s *Server) Run(ctx context.Context) {
 		s.logger.Fatalf("Server forced to shutdown: %v", err)
 	}
 
+	s.order.Shutdown()
 	s.logger.Infoln("Server exiting gracefully")
 }
