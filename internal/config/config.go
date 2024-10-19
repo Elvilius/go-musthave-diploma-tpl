@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 )
 
 type Config struct {
@@ -22,23 +21,12 @@ func getEnvOrDefaultString(envVar string, defaultValue string) string {
 	return defaultValue
 }
 
-func getEnvOrDefaultInt(envVar string, defaultValue int) int {
-	result := defaultValue
-	if value, ok := os.LookupEnv(envVar); ok {
-		valueInt, err := strconv.Atoi(value)
-		if err == nil {
-			result = valueInt
-		}
-	}
-	return result
-}
 
 func New() *Config {
 	cfg := &Config{
 		RunAddress:           getEnvOrDefaultString("RUN_ADDRESS", "localhost:8080"),
 		DatabaseURI:          getEnvOrDefaultString("DATABASE_URI", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"),
 		AccrualSystemAddress: getEnvOrDefaultString("ACCRUAL_SYSTEM_ADDRESS", "http://localhost:3333"),
-		PollInterval:         getEnvOrDefaultInt("POLL_INTERVAL", 3),
 	}
 
 	runServerAddress := flag.String("a", cfg.RunAddress, "Server address")

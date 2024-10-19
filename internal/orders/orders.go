@@ -2,6 +2,7 @@ package orders
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -44,6 +45,7 @@ func New(
 		externalOrderStatusFetcher: externalOrderStatusFetcher,
 		wg:                         &sync.WaitGroup{},
 		logger:                     logger,
+		processCtx: processCtx,
 	}
 }
 
