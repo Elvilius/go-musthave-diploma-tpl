@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -9,13 +8,15 @@ import (
 	"testing"
 
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/balances"
+	mocks_balances "github.com/Elvilius/go-musthave-diploma-tpl.git/internal/balances/mocks"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/config"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/handler"
-	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/mocks"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/models"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/orders"
+	mocks_orders "github.com/Elvilius/go-musthave-diploma-tpl.git/internal/orders/mocks"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/users"
-	"github.com/Elvilius/go-musthave-diploma-tpl.git/pkg/middleware"
+	mocks_users "github.com/Elvilius/go-musthave-diploma-tpl.git/internal/users/mocks"
+	"github.com/Elvilius/go-musthave-diploma-tpl.git/pkg/jwt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
@@ -27,10 +28,10 @@ func TestHandler_GetBalance(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	userStore := mocks.NewMockUserStore(ctrl)
-	orderStore := mocks.NewMockOrderStore(ctrl)
-	balancesStore := mocks.NewMockBalancesStore(ctrl)
-	token := mocks.NewMockToken()
+	userStore := mocks_users.NewMockStorer(ctrl)
+	orderStore := mocks_orders.NewMockStorer(ctrl)
+	balancesStore := mocks_balances.NewMockStorer(ctrl)
+	token := jwt.NewMockToken()
 	userService := users.New(userStore, token, cfg)
 	orderService := orders.New(orderStore, nil, nil, nil)
 	balanceService := balances.New(balancesStore)
@@ -43,8 +44,7 @@ func TestHandler_GetBalance(t *testing.T) {
 	router.Post("/api/user/balance", h.GetBalance)
 
 	request := httptest.NewRequest(http.MethodPost, "/api/user/balance", nil)
-	request = request.WithContext(context.WithValue(request.Context(), middleware.UserIDKey, 1))
-	request.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjJ9.6Oz5eGuwTSWswdvgsxbhvDIBkd9YKzxJSyd9mg4auBM")
+	request = SetAuth(request)
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, request)

@@ -8,12 +8,12 @@ import (
 	"testing"
 
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/balances"
-	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/config"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/handler"
-	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/mocks"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/models"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/orders"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/users"
+	mocks_users "github.com/Elvilius/go-musthave-diploma-tpl.git/internal/users/mocks"
+	"github.com/Elvilius/go-musthave-diploma-tpl.git/pkg/jwt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
@@ -28,12 +28,12 @@ func TestHandler_RegisterUser(t *testing.T) {
 		name     string
 		body     models.UserLogin
 		want     want
-		mockFunk func(userStore *mocks.MockUserStore)
+		mockFunk func(userStore *mocks_users.MockStorer)
 	}{
 		{
 			name: "success create new user",
 			body: models.UserLogin{Login: "test", Password: "123456"},
-			mockFunk: func(userStore *mocks.MockUserStore) {
+			mockFunk: func(userStore *mocks_users.MockStorer) {
 				userStore.EXPECT().CreateUser(gomock.Any(), "test", gomock.Any()).Return(1, nil)
 			},
 			want: want{
@@ -52,7 +52,7 @@ func TestHandler_RegisterUser(t *testing.T) {
 		{
 			name: "error user exists",
 			body: models.UserLogin{Login: "test", Password: "123"},
-			mockFunk: func(userStore *mocks.MockUserStore) {
+			mockFunk: func(userStore *mocks_users.MockStorer) {
 				userStore.EXPECT().CreateUser(gomock.Any(), "test", gomock.Any()).Return(1, models.ErrUserExists)
 			},
 			want: want{
@@ -62,19 +62,17 @@ func TestHandler_RegisterUser(t *testing.T) {
 		},
 	}
 
-	cfg := config.New()
-
 	for _, tt := range tests {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		userStore := mocks.NewMockUserStore(ctrl)
-		token := mocks.NewMockToken()
-		userService := users.New(userStore, token, cfg)
+		userStore := mocks_users.NewMockStorer(ctrl)
+		token := jwt.NewMockToken()
+		userService := users.New(userStore, token, nil)
 
 		orderService := orders.New(nil, nil, nil, nil)
 		balanceService := balances.New(nil)
 
-		h := handler.New(userService, orderService, balanceService, cfg)
+		h := handler.New(userService, orderService, balanceService, nil)
 
 		router := chi.NewRouter()
 		router.Post("/api/user/register", h.RegisterUser)
@@ -106,12 +104,12 @@ func TestHandler_Login(t *testing.T) {
 		name     string
 		body     models.UserLogin
 		want     want
-		mockFunk func(userStore *mocks.MockUserStore)
+		mockFunk func(userStore *mocks_users.MockStorer)
 	}{
 		{
 			name: "success login",
 			body: models.UserLogin{Login: "test", Password: "test"},
-			mockFunk: func(userStore *mocks.MockUserStore) {
+			mockFunk: func(userStore *mocks_users.MockStorer) {
 				userStore.EXPECT().GetUserByLogin(gomock.Any(), "test").Return(models.User{Login: "test", PasswordHash: "$2a$10$EmS6L/RlhGUisab3AAVAUuNShZCmr838QqbekeJEMv56MYbAgkDoC"}, nil)
 			},
 			want: want{
@@ -130,7 +128,7 @@ func TestHandler_Login(t *testing.T) {
 		{
 			name: "error not valid password",
 			body: models.UserLogin{Login: "test", Password: "123"},
-			mockFunk: func(userStore *mocks.MockUserStore) {
+			mockFunk: func(userStore *mocks_users.MockStorer) {
 				userStore.EXPECT().GetUserByLogin(gomock.Any(), "test").Return(models.User{Login: "test", PasswordHash: "$2a$10$EmS6L/RlhGUisab3AAVAUuNShZCmr838QqbekeJEMv56MYbAgkDoC"}, nil)
 			},
 			want: want{
@@ -140,19 +138,17 @@ func TestHandler_Login(t *testing.T) {
 		},
 	}
 
-	cfg := config.New()
-
 	for _, tt := range tests {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		userStore := mocks.NewMockUserStore(ctrl)
-		token := mocks.NewMockToken()
-		userService := users.New(userStore, token, cfg)
+		userStore := mocks_users.NewMockStorer(ctrl)
+		token := jwt.NewMockToken()
+		userService := users.New(userStore, token, nil)
 
 		orderService := orders.New(nil, nil, nil, nil)
 		balanceService := balances.New(nil)
 
-		h := handler.New(userService, orderService, balanceService, cfg)
+		h := handler.New(userService, orderService, balanceService, nil)
 
 		router := chi.NewRouter()
 		router.Post("/api/user/login", h.LoginUser)

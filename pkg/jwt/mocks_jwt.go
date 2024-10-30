@@ -1,4 +1,4 @@
-package mocks
+package jwt
 
 type MockToken struct{}
 

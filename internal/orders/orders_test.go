@@ -7,8 +7,8 @@ import (
 
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/config"
 	external_order_status_fetcher "github.com/Elvilius/go-musthave-diploma-tpl.git/internal/external-order-status-fetcher"
-	mocks_orders "github.com/Elvilius/go-musthave-diploma-tpl.git/internal/mocks"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/models"
+	mocks_orders "github.com/Elvilius/go-musthave-diploma-tpl.git/internal/orders/mocks"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/pkg/logger"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -48,7 +48,7 @@ func TestService_Add(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			m := mocks_orders.NewMockOrderStore(ctrl)
+			m := mocks_orders.NewMockStorer(ctrl)
 
 			s := &Service{
 				store:                      m,
@@ -113,14 +113,15 @@ func TestService_GetAll(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			m := mocks_orders.NewMockOrderStore(ctrl)
+			m := mocks_orders.NewMockStorer(ctrl)
 
 			s := &Service{
 				store: m,
 				cfg:   tt.fields.cfg,
 			}
 
-			m.EXPECT().GetAllOrders(tt.args.ctx, tt.args.userID).Return(tt.mockOrder, tt.err)
+			m.EXPECT().
+			GetAllOrders(gomock.Any(), gomock.Any()).Return(tt.mockOrder, tt.err)
 
 			orders, err := s.GetAll(tt.args.ctx, tt.args.userID)
 			if err == nil {
