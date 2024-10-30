@@ -18,7 +18,7 @@ func CheckLuhn(cnn string) bool {
 			return false
 		}
 		if i%2 == parity {
-			digital = digital * 2
+			digital*=2
 			if digital > 9 {
 				digital-=9
 			}

@@ -85,6 +85,5 @@ func (s *Server) Run(ctx context.Context) {
 		s.logger.Fatalf("Server forced to shutdown: %v", err)
 	}
 
-	s.order.Shutdown()
 	s.logger.Infoln("Server exiting gracefully")
 }

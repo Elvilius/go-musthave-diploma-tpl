@@ -6,12 +6,18 @@ import (
 	"os"
 )
 
+const (
+	PollInterval = 5
+	NumWorkers   = 3
+)
+
 type Config struct {
 	RunAddress           string
 	DatabaseURI          string
 	AccrualSystemAddress string
 	Secret               string
 	PollInterval         int
+	NumWorkers           int
 }
 
 func getEnvOrDefaultString(envVar string, defaultValue string) string {
@@ -20,7 +26,6 @@ func getEnvOrDefaultString(envVar string, defaultValue string) string {
 	}
 	return defaultValue
 }
-
 
 func New() *Config {
 	cfg := &Config{
@@ -38,7 +43,8 @@ func New() *Config {
 	cfg.RunAddress = *runServerAddress
 	cfg.DatabaseURI = *databaseURI
 	cfg.AccrualSystemAddress = *accrualSystemAddress
-
+	cfg.PollInterval = PollInterval
+	cfg.NumWorkers = NumWorkers
 	cfg.Secret = "Secret"
 	fmt.Println("Server Address:", cfg.RunAddress)
 	fmt.Println("Database URI", cfg.DatabaseURI)

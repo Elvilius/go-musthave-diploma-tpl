@@ -37,7 +37,7 @@ func (e *ExternalOrderStatusFetcher) GetOrder(ctx context.Context, number string
 	var order models.ExternalOrder
 
 	client := http.Client{}
-	req, err := http.NewRequest(http.MethodGet, e.cfg.AccrualSystemAddress+"/api/orders/"+number, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, e.cfg.AccrualSystemAddress+"/api/orders/"+number, nil)
 	if err != nil {
 		return order, err
 	}

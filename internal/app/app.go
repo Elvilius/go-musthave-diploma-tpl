@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/app/server"
 	"github.com/Elvilius/go-musthave-diploma-tpl.git/internal/balances"
@@ -20,14 +21,13 @@ import (
 )
 
 type App struct {
-	ctx    context.Context
 	server *server.Server
 	db     *sql.DB
 	logger *zap.SugaredLogger
 	order  *orders.Service
 }
 
-func New(ctx context.Context) *App {
+func New() *App {
 	logger, err := logger.New()
 	if err != nil {
 		logger.Fatalw("Failed to open DB", "error", err)
@@ -39,12 +39,14 @@ func New(ctx context.Context) *App {
 		logger.Fatalw("Failed to open DB", "error", err)
 	}
 
+	fmt.Println(db)
+
 	store := store.New(db)
 
 	tokenService := jwt.New(cfg)
 	userService := users.New(store, tokenService, cfg)
 	externalOrderStatusFetcher := externalorderstatusfetcher.New(cfg, logger)
-	orderService := orders.New(ctx, store, externalOrderStatusFetcher, cfg, logger)
+	orderService := orders.New(store, externalOrderStatusFetcher, cfg, logger)
 	balanceService := balances.New(store)
 
 	handler := handler.New(userService, orderService, balanceService, cfg)
@@ -56,17 +58,20 @@ func New(ctx context.Context) *App {
 		db:     db,
 		logger: logger,
 		order:  orderService,
-		ctx: ctx,
 	}
 }
 
-func (a *App) RunContext() {
+func (a *App) RunContext(ctx context.Context) {
+	fmt.Println(ctx)
+
 	a.logger.Infow("Running migrations", "db", a.db)
-	if err := goose.UpContext(a.ctx, a.db, "./internal/store/migrations"); err != nil {
+	if err := goose.UpContext(ctx, a.db, "./internal/store/migrations"); err != nil {
 		a.logger.Fatalw("Failed to run migrations", "error", err)
 	}
 
-	a.server.Run(a.ctx)
+	go a.order.UpdateOrder(ctx)
+
+	a.server.Run(ctx)
 
 	defer a.db.Close()
 }
