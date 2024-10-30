@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -19,6 +20,7 @@ func (h *Handler) GetBalance(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	fmt.Println(userID)
 	balance, err := h.balance.GetBalance(ctx, userID)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
